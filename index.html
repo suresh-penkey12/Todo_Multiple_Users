@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="register">
+      <h1>REGISTER</h1>
+      <input id="registerUser" type="text" />
+      <input id="registerPassword" type="text" />
+      <button onclick="register()">REGISTER</button>
+    </div>
+    <div id="login">
+      <h1>LOGIN</h1>
+      <input id="loginuser" type="text" />
+      <input id="loginpassword" type="text" />
+      <button onclick="login()">LOGIN</button>
+    </div>
+    <div id="userdetails">
+      <h1>ADD TODOS</h1>
+      <input id="inp" type="text" />
+      <button onclick="AddTodo()">ADD</button>
+      <div id="list">tasks</div>
+      <h1>LOGOUT</h1>
+      <button id="log" onclick="logout()">logout</button>
+    </div>
+    <script>
+      let users = JSON.parse(localStorage.getItem("usernames")) || {};
+      let currentuser = JSON.parse(localStorage.getItem("currentuser")) || null;
+      //save data
+      function savedata() {
+        localStorage.setItem("usernames", JSON.stringify(users));
+        localStorage.setItem("currentuser", JSON.stringify(currentuser));
+      }
+      // register function
+      function register() {
+        let username = document.getElementById("registerUser").value.trim();
+        let password = document.getElementById("registerPassword").value.trim();
+        if (!username || !password) {
+          alert("please enter register details");
+          return;
+        }
+        users[username] = { password: password, todo: ["eat", "sleep"] };
+        savedata();
+      }
+
+      // login function
+
+      function login() {
+        let username = document.getElementById("loginuser").value.trim();
+        let password = document.getElementById("loginpassword").value.trim();
+        let k = JSON.parse(localStorage.getItem("usernames"));
+        if (!username || !password) {
+          alert("please enter username or password");
+          return;
+        } else if (!k[username] || k[username].password != password) {
+          alert("enter valid details");
+          return;
+        }
+
+        document.getElementById("register").style.display = "none";
+        document.getElementById("login").style.display = "none";
+        document.getElementById("userdetails").style.display = "block";
+        currentuser = username;
+        savedata();
+        // displaytodos(username)
+
+        displaytodos();
+      }
+
+      function AddTodo() {
+        let inp = document.getElementById("inp").value.trim();
+        users[currentuser].todo.push(inp);
+        savedata();
+        displaytodos();
+        document.getElementById("inp").value = "";
+      }
+
+      function displaytodos() {
+        let list = document.getElementById("list");
+        let tasks = users[currentuser].todo;
+        let element = "";
+        tasks.map((val, index) => {
+          element += `${val} 
+                <button onclick="edit(${index})">EDIT</button>
+                <button onclick="del(${index})">DELETE</button><br>`;
+        });
+        list.innerHTML = element;
+      }
+
+      function del(index) {
+        users[currentuser].todo.splice(index, 1);
+        savedata();
+        displaytodos();
+      }
+
+      function edit(index) {
+        let input = prompt();
+        users[currentuser].todo[index] = input;
+        savedata();
+        displaytodos();
+      }
+
+      function logout() {
+        currentuser = null;
+        savedata();
+        document.getElementById("register").style.display = "block";
+        document.getElementById("login").style.display = "block";
+        document.getElementById("userdetails").style.display = "none";
+      }
+
+      window.onload = function () {
+        if (currentuser) {
+          document.getElementById("register").style.display = "none";
+          document.getElementById("login").style.display = "none";
+          document.getElementById("userdetails").style.display = "block";
+          displaytodos();
+        } else {
+          document.getElementById("userdetails").style.display = "none";
+        }
+      };
+    </script>
+  </body>
+</html>
