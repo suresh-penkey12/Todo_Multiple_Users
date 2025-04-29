@@ -1,127 +1,275 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
-  </head>
-  <body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Animated Todo App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #00c6ff, #0072ff);
+      margin: 0;
+      padding: 40px 0;
+      display: flex;
+      justify-content: center;
+      align-items: start;
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 500px;
+      animation: fadeInContainer 1s ease-out;
+    }
+    h1 {
+      text-align: center;
+      color: #0072ff;
+      margin-bottom: 20px;
+      animation: bounceIn 0.6s ease-in-out;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+      transition: all 0.3s ease;
+    }
+    input:focus {
+      border-color: #0072ff;
+      box-shadow: 0 0 8px #cce6ff;
+    }
+    button {
+      background-color: #0072ff;
+      color: white;
+      padding: 10px 20px;
+      margin-top: 10px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background 0.3s ease;
+    }
+    button:hover {
+      background-color: #005fcc;
+      transform: scale(1.05);
+    }
+    .task {
+      background: #f4faff;
+      border: 2px solid #e6f2ff;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 10px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: slideUp 0.5s ease-in-out;
+    }
+    .task.completed span {
+      text-decoration: line-through;
+      color: gray;
+    }
+    .status {
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    .completed .status {
+      color: green;
+    }
+    .incomplete .status {
+      color: red;
+    }
+    #userHeader {
+      text-align: center;
+      font-size: 20px;
+      color: #333;
+      margin-bottom: 20px;
+      animation: pulse 1.5s infinite;
+    }
+
+    /* Animations */
+    @keyframes fadeInContainer {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes bounceIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      60% { transform: scale(1.1); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes pulse {
+      0% { color: #0072ff; }
+      50% { color: #003366; }
+      100% { color: #0072ff; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
     <div id="register">
       <h1>REGISTER</h1>
-      <input id="registerUser" type="text" />
-      <input id="registerPassword" type="text" />
-      <button onclick="register()">REGISTER</button>
+      <input id="registerUser" type="text" placeholder="Username" />
+      <input id="registerPassword" type="password" placeholder="Password" />
+      <button onclick="register()">Register</button>
+      <button onclick="showSection('login')">Go to Login</button>
     </div>
-    <div id="login">
+
+    <div id="login" style="display: none;">
       <h1>LOGIN</h1>
-      <input id="loginuser" type="text" />
-      <input id="loginpassword" type="text" />
-      <button onclick="login()">LOGIN</button>
+      <input id="loginuser" type="text" placeholder="Username" />
+      <input id="loginpassword" type="password" placeholder="Password" />
+      <button onclick="login()">Login</button>
+      <button onclick="showSection('register')">Back to Register</button>
     </div>
-    <div id="userdetails">
-      <h1>ADD TODOS</h1>
-      <input id="inp" type="text" />
-      <button onclick="AddTodo()">ADD</button>
-      <div id="list">tasks</div>
-      <h1>LOGOUT</h1>
-      <button id="log" onclick="logout()">logout</button>
+
+    <div id="userdetails" style="display: none;">
+      <h1 id="userHeader">User's Tasks</h1>
+      <input id="inp" type="text" placeholder="Enter a task" />
+      <button onclick="AddTodo()">Add Task</button>
+      <div id="list"></div>
+      <button onclick="logout()">Logout</button>
     </div>
-    <script>
-      let users = JSON.parse(localStorage.getItem("usernames")) || {};
-      let currentuser = JSON.parse(localStorage.getItem("currentuser")) || null;
-      //save data
-      function savedata() {
-        localStorage.setItem("usernames", JSON.stringify(users));
-        localStorage.setItem("currentuser", JSON.stringify(currentuser));
+  </div>
+
+  <script>
+    let users = JSON.parse(localStorage.getItem("usernames")) || {};
+    let currentuser = JSON.parse(localStorage.getItem("currentuser")) || null;
+
+    function savedata() {
+      localStorage.setItem("usernames", JSON.stringify(users));
+      localStorage.setItem("currentuser", JSON.stringify(currentuser));
+    }
+
+    function showSection(section) {
+      document.getElementById("register").style.display = section === "register" ? "block" : "none";
+      document.getElementById("login").style.display = section === "login" ? "block" : "none";
+      document.getElementById("userdetails").style.display = section === "userdetails" ? "block" : "none";
+    }
+
+    function register() {
+      let username = document.getElementById("registerUser").value.trim();
+      let password = document.getElementById("registerPassword").value.trim();
+
+      if (!username || !password) {
+        alert("Fill all fields.");
+        return;
       }
-      // register function
-      function register() {
-        let username = document.getElementById("registerUser").value.trim();
-        let password = document.getElementById("registerPassword").value.trim();
-        if (!username || !password) {
-          alert("please enter register details");
-          return;
-        }
-        users[username] = { password: password, todo: [] };
-        savedata();
-        alert("Register Successful");
+
+      if (users[username]) {
+        alert("User already exists. Please login.");
+        showSection("login");
+        return;
       }
 
-      // login function
+      users[username] = { password, todo: [] };
+      savedata();
 
-      function login() {
-        let username = document.getElementById("loginuser").value.trim();
-        let password = document.getElementById("loginpassword").value.trim();
-        let k = JSON.parse(localStorage.getItem("usernames"));
-        if (!username || !password) {
-          alert("please enter username or password");
-          return;
-        } else if (!k[username] || k[username].password != password) {
-          alert("enter valid details");
-          return;
-        }
+      document.getElementById("registerUser").value = "";
+      document.getElementById("registerPassword").value = "";
+      alert("Registered successfully!");
+      showSection("login");
+    }
 
-        document.getElementById("register").style.display = "none";
-        document.getElementById("login").style.display = "none";
-        document.getElementById("userdetails").style.display = "block";
-        currentuser = username;
+    function login() {
+      let username = document.getElementById("loginuser").value.trim();
+      let password = document.getElementById("loginpassword").value.trim();
+
+      if (!username || !password) {
+        alert("Enter all login details.");
+        return;
+      }
+
+      if (!users[username] || users[username].password !== password) {
+        alert("Invalid username or password.");
+        return;
+      }
+
+      currentuser = username;
+      savedata();
+      showSection("userdetails");
+      displaytodos();
+    }
+
+    function AddTodo() {
+      let inp = document.getElementById("inp").value.trim();
+      if (!inp) return;
+
+      users[currentuser].todo.push({ text: inp, done: false });
+      savedata();
+      document.getElementById("inp").value = "";
+      displaytodos();
+    }
+
+    function displaytodos() {
+      let list = document.getElementById("list");
+      let tasks = users[currentuser]?.todo || [];
+      let html = "";
+
+      document.getElementById("userHeader").innerText = `${currentuser}'s Tasks`;
+
+      tasks.forEach((task, index) => {
+        html += `
+          <div class="task ${task.done ? 'completed' : 'incomplete'}">
+            <div>
+              <span class="status">${task.done ? '✅ Completed' : '⬜ Incomplete'}</span>
+              <span onclick="toggleComplete(${index})" style="cursor:pointer;">${task.text}</span>
+            </div>
+            <div>
+              <button onclick="edit(${index})">Edit</button>
+              <button onclick="del(${index})">Delete</button>
+            </div>
+          </div>`;
+      });
+
+      list.innerHTML = html;
+    }
+
+    function del(index) {
+      users[currentuser].todo.splice(index, 1);
+      savedata();
+      displaytodos();
+    }
+
+    function edit(index) {
+      let newTask = prompt("Edit task:", users[currentuser].todo[index].text);
+      if (newTask !== null) {
+        users[currentuser].todo[index].text = newTask.trim();
         savedata();
-        // displaytodos(username)
-
         displaytodos();
       }
+    }
 
-      function AddTodo() {
-        let inp = document.getElementById("inp").value.trim();
-        users[currentuser].todo.push(inp);
-        savedata();
+    function toggleComplete(index) {
+      users[currentuser].todo[index].done = !users[currentuser].todo[index].done;
+      savedata();
+      displaytodos();
+    }
+
+    function logout() {
+      currentuser = null;
+      savedata();
+      showSection("login");
+    }
+
+    window.onload = function () {
+      if (currentuser) {
+        showSection("userdetails");
         displaytodos();
-        document.getElementById("inp").value = "";
+      } else {
+        showSection("login");
       }
-
-      function displaytodos() {
-        let list = document.getElementById("list");
-        let tasks = users[currentuser].todo;
-        let element = "";
-        tasks.map((val, index) => {
-          element += `${val} 
-                <button onclick="edit(${index})">EDIT</button>
-                <button onclick="del(${index})">DELETE</button><br>`;
-        });
-        list.innerHTML = element;
-      }
-
-      function del(index) {
-        users[currentuser].todo.splice(index, 1);
-        savedata();
-        displaytodos();
-      }
-
-      function edit(index) {
-        let input = prompt();
-        users[currentuser].todo[index] = input;
-        savedata();
-        displaytodos();
-      }
-
-      function logout() {
-        currentuser = null;
-        savedata();
-        document.getElementById("register").style.display = "block";
-        document.getElementById("login").style.display = "block";
-        document.getElementById("userdetails").style.display = "none";
-      }
-
-      window.onload = function () {
-        if (currentuser) {
-          document.getElementById("register").style.display = "none";
-          document.getElementById("login").style.display = "none";
-          document.getElementById("userdetails").style.display = "block";
-          displaytodos();
-        } else {
-          document.getElementById("userdetails").style.display = "none";
-        }
-      };
-    </script>
-  </body>
+    };
+  </script>
+</body>
 </html>
